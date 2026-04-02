@@ -3,11 +3,21 @@
   "owner": {
     "name": "harambe contributors"
   },
+  "metadata": {
+    "description": "Structured think-then-do workflow for Claude Code",
+    "version": "1.0.0"
+  },
   "plugins": [
     {
       "name": "harambe",
       "source": "./",
-      "description": "Structured think-then-do workflow. Spec-driven, TDD-first, with autonomous subagent execution, multi-agent validation, and a learning loop."
+      "description": "Structured think-then-do workflow. Spec-driven, TDD-first, with autonomous subagent execution, multi-agent validation, and a learning loop.",
+      "version": "1.0.0",
+      "author": {
+        "name": "harambe contributors"
+      },
+      "license": "MIT",
+      "tags": ["workflow", "tdd", "spec-driven", "multi-agent", "code-review"]
     }
   ]
 }

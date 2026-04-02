@@ -1,8 +1,20 @@
 {
   "name": "harambe",
-  "description": "Structured think-then-do development workflow. Spec-driven, TDD-first, with autonomous subagent execution, multi-agent validation, and a cross-session learning loop.",
   "version": "1.0.0",
+  "description": "Structured think-then-do development workflow. Spec-driven, TDD-first, with autonomous subagent execution, multi-agent validation, and a cross-session learning loop.",
   "author": {
     "name": "harambe contributors"
+  },
+  "repository": "https://github.com/Q9-Ahimsa/harambe",
+  "license": "MIT",
+  "keywords": ["workflow", "tdd", "spec-driven", "multi-agent", "code-review"],
+  "skills": "./skills",
+  "agents": "./agents",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    }
   }
 }

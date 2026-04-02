@@ -156,7 +156,7 @@ The plugin includes 12 specialized agents:
 
 ### Auto-configured
 
-- **Context7 MCP** — framework documentation fetching. Bundled in the plugin's `.mcp.json`. Accept the MCP server prompt when it appears.
+- **Context7 MCP** — framework documentation fetching. Bundled in the plugin's `mcpServers` config. Accept the MCP server prompt when it appears.
 
 ## Project setup
 

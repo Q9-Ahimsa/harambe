@@ -1,14 +1,17 @@
 {
-  "hooks": [
-    {
-      "event": "Stop",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/enforce-tests.js",
-          "timeout": 10
-        }
-      ]
-    }
-  ]
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/enforce-tests.js\"",
+            "timeout": 10
+          }
+        ],
+        "description": "Block if source files were modified but tests haven't run"
+      }
+    ]
+  }
 }
