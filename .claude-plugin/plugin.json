@@ -8,7 +8,6 @@
   "repository": "https://github.com/Q9-Ahimsa/harambe",
   "license": "MIT",
   "keywords": ["workflow", "tdd", "spec-driven", "multi-agent", "code-review"],
-  "skills": "./skills",
   "mcpServers": {
     "context7": {
       "type": "http",
