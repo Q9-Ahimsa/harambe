@@ -48,6 +48,28 @@ claude --plugin-dir /path/to/think-do
   → extracts learnings for next cycle
 ```
 
+### Run think and do in separate sessions
+
+This is the single most important usage recommendation. **Start a fresh Claude Code instance for `/harambe:do`** — don't run it in the same session as `/harambe:think`.
+
+Why: `/harambe:do` spawns subagents aggressively — one per Done Criteria item, three validation agents in parallel, four PR review agents. Each subagent prompt includes literal file contents, interface definitions, and behavioral rules. If your context window is already half-full from a `/harambe:think` exploration, you'll hit compaction mid-build. Compaction during execution causes drift — accumulated context gets summarized, nuance gets lost, and the subagent prompts degrade.
+
+The spec is the handoff mechanism. `/harambe:think` writes it to disk. `/harambe:do` reads it from disk. They don't need to share a conversation.
+
+```
+# Session 1
+/harambe:think "add user authentication"
+# → spec written to .claude/specs/add-user-authentication.md
+# → close this session
+
+# Session 2 (fresh context)
+/harambe:do
+# → picks up the ready spec automatically
+# → full context available for subagent work
+```
+
+If you're running multiple features in parallel, use separate terminal tabs — one `/harambe:do` per tab, each building a different spec in a worktree.
+
 ## How it works
 
 ### /think phases
