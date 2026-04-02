@@ -1,0 +1,14 @@
+{
+  "hooks": [
+    {
+      "event": "Stop",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/enforce-tests.js",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
+}
