@@ -9,8 +9,8 @@ Monkey think, monkey do.
 Add the marketplace and install:
 
 ```
-/plugin marketplace add your-org/think-do
-/plugin install harambe@your-org
+/plugin marketplace add Q9-Ahimsa/harambe
+/plugin install harambe@harambe
 /reload-plugins
 ```
 
