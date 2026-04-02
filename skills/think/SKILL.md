@@ -1,6 +1,6 @@
 ---
 name: think
-description: "Universal thinking entry point for all non-trivial work. Explores the problem space, produces a spec, and hands off to /do. Narrates its process for transparency — the user watches thinking unfold and gets asked only for senior-level decisions. Triggers on: think, explore, discuss, plan, debug, investigate, what should we, how should we."
+description: Explore the problem space, align on scope, research codebase and external best practices, then produce a spec for /do to execute. Use for any non-trivial work.
 ---
 
 # /think

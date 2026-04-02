@@ -1,6 +1,6 @@
 ---
 name: align
-description: "Iterative deep interview using AskUserQuestion — the single pre-planning skill. Exhaustively surfaces implicit assumptions, hidden complexity, and non-obvious requirements through structured questioning loops until both sides share a vivid, aligned mental model. Use before planning any non-trivial work. Triggers on: align, let's align, clarify this, help me think through, what am I missing."
+description: Iterative deep interview to surface implicit assumptions and hidden requirements. Keeps questioning until both sides share a vivid, aligned mental model.
 ---
 
 # /align

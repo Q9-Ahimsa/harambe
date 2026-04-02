@@ -1,6 +1,6 @@
 {
   "name": "harambe",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Structured think-then-do development workflow. Spec-driven, TDD-first, with autonomous subagent execution, multi-agent validation, and a cross-session learning loop.",
   "author": {
     "name": "harambe contributors"

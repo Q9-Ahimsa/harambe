@@ -1,6 +1,6 @@
 ---
 name: do
-description: "Execution phase that takes a spec produced by /think and builds it with TDD discipline. Reads the spec, writes tests first, implements, commits atomically, validates, simplifies, and closes out. Narrates progress for transparency — pauses only for senior-level decisions. Triggers on: do, build this, execute, let's build, implement."
+description: Execute a spec with TDD discipline. Builds each criterion with subagents, validates with three parallel agents, ships PR, and extracts learnings. Use after /think produces a spec.
 ---
 
 # /do
