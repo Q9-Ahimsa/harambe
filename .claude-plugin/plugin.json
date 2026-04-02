@@ -9,8 +9,6 @@
   "license": "MIT",
   "keywords": ["workflow", "tdd", "spec-driven", "multi-agent", "code-review"],
   "skills": "./skills",
-  "agents": "./agents",
-  "hooks": "./hooks/hooks.json",
   "mcpServers": {
     "context7": {
       "type": "http",

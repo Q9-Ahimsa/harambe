@@ -440,7 +440,7 @@ Run silently — fix any failures before spawning agents:
 
 ### Spawn Three Agents (all in a single message)
 
-**1. Verifier** (`subagent_type: "verifier"`):
+**1. Verifier** (`subagent_type: "harambe:verifier"`):
 ```
 Verify the build for feature '{feature-name}'.
 Spec path: .claude/specs/{feature}.md
@@ -448,14 +448,14 @@ Test command: {test command}
 Session log summary: {PROBLEM/FIX entries, adaptations, amendments, inline decisions}
 ```
 
-**2. Build Security** (`subagent_type: "build-security"`):
+**2. Build Security** (`subagent_type: "harambe:build-security"`):
 ```
 Security scan for feature '{feature-name}'.
 Spec path: .claude/specs/{feature}.md
 Files created or modified: {file list}
 ```
 
-**3. Build Regression** (`subagent_type: "build-regression"`):
+**3. Build Regression** (`subagent_type: "harambe:build-regression"`):
 ```
 Regression check for feature '{feature-name}'.
 Spec path: .claude/specs/{feature}.md
