@@ -320,6 +320,7 @@ If verification reveals a wrong assumption, update the spec before finalizing.
 - Every decision from the design conversation that affects implementation MUST be in the spec — including auto-decided ones (marked `(auto)`)
 - Include file paths for every file to create or modify
 - Include interface definitions when components interact
+- Done Criteria **MUST use `- [ ]` checkbox format** — /do parses this programmatically. Headings, prose blocks, or numbered lists are invisible to the executor and will read as 0 Done Criteria
 - Done Criteria must be specific enough to derive tests from
 - Done Criteria are the **executor's task checklist** — /do checks them off as it builds
 - `Session:` field links to the session log entry ID

@@ -56,6 +56,7 @@
 ## Done Criteria
 
 > /do uses this as its task checklist. Each criterion gets checked off with a commit hash as it's completed.
+> **FORMAT IS PROTOCOL:** Every criterion MUST be a `- [ ]` checkbox line. /do's orient script counts `- [ ]` lines to determine if a spec is buildable. Headings, prose, or numbered lists will read as 0 criteria.
 
 - [ ] {criterion}
 - [ ] {criterion}

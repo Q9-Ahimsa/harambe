@@ -60,6 +60,10 @@ Look beyond the spec's own frame. What scenarios exist that it doesn't address?
 - For each failure: does the spec say what should happen? Silent failure, retry, user-facing error, fallback?
 - If the spec doesn't mention error handling at all, that's a gap worth flagging.
 
+**Done Criteria Format (Critical):**
+- Every Done Criterion MUST be a `- [ ]` checkbox line. /do's orient script counts `- [ ]` lines to determine if a spec is buildable.
+- If DCs use headings, prose blocks, numbered lists, or any other format -> **Critical**. They will read as 0 criteria and the spec will be declared unbuildable.
+
 **Test Derivability:**
 - For each Done Criterion: can you write a concrete test assertion from it?
 - "Works correctly" -> not derivable. "Returns 200 with JSON body containing `user_id`" -> derivable.
