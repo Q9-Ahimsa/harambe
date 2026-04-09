@@ -407,8 +407,9 @@ Set spec status to `ready`.
 
 If /think consumed a design doc from /feel:
 1. Create `.claude/specs/archive/` if needed
-2. Add `**Consumed:** {date}` and `**Spec:** {feature}.md` to design doc metadata
-3. Move design doc to `.claude/specs/archive/`
+2. Set `**Status:** consumed`
+3. Add `**Consumed:** {date}` and `**Spec:** {feature}.md` to design doc metadata
+4. Move design doc to `.claude/specs/archive/`
 
 ### Write Design Accuracy Feedback
 
