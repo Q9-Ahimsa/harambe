@@ -5,9 +5,11 @@ description: "Scaffolded exploration for unclear ideas. Produces a design doc th
 
 # /feel
 
-The feeling-out phase. One job: **explore a vague idea until it's clear enough to spec, then capture that clarity as a design doc.**
+The feeling-out phase. One job: **scaffold the user's decision-making until a vague idea becomes a clear design.**
 
-/feel scaffolds your thinking through conversation — one question at a time, proposing options, building up a shared picture of what you're building and why. You watch the exploration unfold. You get asked at every step because this is YOUR design.
+/feel is for when you know something needs to happen but haven't figured out what exactly, or you know what you want but not the best way to get there. You have intuition and vision. /feel brings best practices, implications, considerations, and the ability to see around corners. Together you build a design.
+
+/feel operates at a higher abstraction level than /think. /think scaffolds the **plan** — specifics, boundaries, done criteria. /feel scaffolds the **idea** — concepts, approaches, trade-offs. Don't drill into implementation details. Stay at the level where decisions shape *what* gets built, not *how*.
 
 > **/feel does NOT write code.** Never writes implementation code, modifies source files, or creates project files. Those are /do's job via /think's spec.
 
@@ -83,9 +85,11 @@ Ask 2-3 adaptive questions that probe these dimensions. Don't ask them literally
 
 ## Scaffolding
 
-The core of /feel — building shared understanding through structured conversation.
+The core of /feel. You're not extracting requirements — you're **scaffolding the user's decision-making.** They have intuition and vision but may not know best practices, implications, or the downstream effects of their choices. You bring that expertise. Together you build a design.
 
 ### Voice
+
+**Bring expertise the user doesn't have.** When they make a choice, surface what they can't see — best practices, implications, first/second/third-order effects. "If we go with X, that means Y for performance and Z for maintenance — both fine for your scale, but worth knowing." Don't lecture. Surface implications at the moment they're relevant.
 
 **Talk about your understanding of the problem.** Reflections, assumption checks, scope observations — this is valuable. Build the user's mental model as you explore together.
 
@@ -107,32 +111,67 @@ The core of /feel — building shared understanding through structured conversat
 
 **Explicit fatigue DOES stop the conversation.** "Let's just go", "enough", "move on" — when that happens, capture what you have and proceed to design doc writing. Mark unclear dimensions as Open Questions.
 
-### Checkpoints
+### The Arc
 
-Mark progress as you go:
+Scaffolding has three phases. Each has a purpose and a transition signal. Don't skip phases, but don't pad them — some conversations move fast.
+
+```
+Ground → Understand → Explore → (Writing the Design Doc)
+```
+
+#### Phase 1: Ground
+
+**Purpose:** Build context so your questions are informed by reality, not assumptions.
+
+Read relevant code, project structure, and existing patterns before asking your first scaffolding question. Don't narrate the exploration — just let it inform what you ask and propose.
+
+What to look for:
+- Existing patterns that constrain or inform the approach
+- Related features that might be affected
+- Tech stack and conventions already in use
+- Previous attempts at similar work (check session log, backlog)
+
+**Transition:** You have enough codebase context to ask informed questions. Move to Understand.
+
+#### Phase 2: Understand
+
+**Purpose:** Figure out what the user wants and why — surfacing implications they can't see.
+
+This is where you resolve the vague dimensions from triage. But you're not just collecting answers — you're **expanding the user's view of the problem.** When they say what they want, show them what that means:
+
+- "That approach works, but it means X for your users and Y for maintenance"
+- "There's a best practice here — most projects handle this by Z because..."
+- "One thing to consider: if we do X now, it constrains Y later. Fine if you don't need Y, but worth deciding consciously"
+
+**Checkpoints:** As each vague dimension becomes concrete, mark it and write the corresponding design doc bone to disk as a draft:
 
 ```
 ─── Checkpoint: {dimension} ──────────────
 ```
 
-Write key decisions and understanding to the session log progressively — don't wait until the end. If the session is interrupted, these checkpoints are how you resume.
+Confirm each bone inline: "Here's what I'm capturing for Goal: {text}. That right?" Write to session log progressively — if the session is interrupted, these checkpoints are how you resume.
 
-### Scope Decomposition Gate
+**Transition:** All vague dimensions from triage have concrete answers. Move to Explore.
 
-**Before proposing an approach:** Check if the idea spans multiple independent subsystems. If so, flag it: "This touches {X}, {Y}, and {Z} independently. Each could be its own design → spec → build cycle. Want to focus on {X} first, or scope the whole thing?"
+#### Phase 3: Explore
+
+**Purpose:** Map the solution space and converge on an approach.
+
+**Scope Decomposition Gate (before proposing approaches):** Check if the idea spans multiple independent subsystems. If so, flag it: "This touches {X}, {Y}, and {Z} independently. Each could be its own design → spec → build cycle. Want to focus on {X} first, or scope the whole thing?"
 
 Don't over-decompose — 2-3 independent pieces is a reasonable split. A single cohesive system doesn't need decomposition just because it has multiple components.
 
-### Approach Proposal
-
-When the problem space is clear, propose approaches:
+**Approach Proposal:** When you're ready to propose:
 
 - **Lead with your recommendation and why**
 - 2-3 approaches max with trade-offs framed as user-experienced consequences
 - If one approach is clearly right, just recommend it — don't manufacture alternatives
 - YAGNI bias — simplest approach that solves the stated problem wins
+- **Surface the non-obvious:** What are the downstream effects of each approach? What doors does it open or close? What maintenance burden does it create?
 
 Get explicit approval before proceeding to design doc writing.
+
+**Transition:** User approves an approach. Move to Writing the Design Doc.
 
 ---
 
@@ -163,7 +202,9 @@ Use the template at [design-template.md](./assets/design-template.md). Fill the 
 
 ### Progressive Writing
 
-Write the design doc to disk as a **draft** during the conversation, not just at the end. As each required bone crystallizes, write it. If the session is interrupted, the draft persists.
+Bones get written during scaffolding's Understand phase — each confirmed inline with the user. By the time you reach this section, the Goal, Scope, and Open Questions bones should already be on disk as a draft. The Approach bone gets written after Explore phase approval.
+
+Finalize here: fill any remaining bones, add optional sections from the conversation, and ensure the doc reads as a coherent whole — not a collection of fragments.
 
 Set status to `draft` initially, `ready` when complete.
 
