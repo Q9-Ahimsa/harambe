@@ -67,6 +67,25 @@ if [ "$specs_found" = false ]; then
 fi
 echo ""
 
+# Design Docs
+echo "## Design Docs"
+designs_found=false
+if [ -d ".claude/specs" ]; then
+  for design_file in .claude/specs/*-design.md; do
+    [ -f "$design_file" ] || continue
+    fname=$(basename "$design_file")
+    status=$(spec_field "$design_file" "Status")
+    desc=$(spec_field "$design_file" "Desc")
+    [ -z "$desc" ] && desc="(no desc)"
+    echo "- ${fname} [${status}] — ${desc}"
+    designs_found=true
+  done
+fi
+if [ "$designs_found" = false ]; then
+  echo "None"
+fi
+echo ""
+
 # Research Briefs
 echo "## Research Briefs"
 briefs_found=false

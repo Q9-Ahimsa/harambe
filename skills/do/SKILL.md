@@ -1,6 +1,6 @@
 ---
 name: do
-description: Execute a spec with TDD discipline. Builds each criterion with subagents, validates with three parallel agents, ships PR, and extracts learnings. Use after /think produces a spec.
+description: "Execution phase that takes a spec produced by /think and builds it with TDD discipline. Reads the spec, writes tests first, implements, commits atomically, validates, simplifies, and closes out. Narrates progress for transparency — pauses only for senior-level decisions. Triggers on: do, build this, execute, let's build, implement."
 ---
 
 # /do
@@ -127,6 +127,8 @@ After each subagent completes, specifically check for:
 - **Security surface changes?** New inputs not validated, auth checks removed, secrets handling changed.
 
 > **Treat subagent output like a PR from a junior developer.** Trust the intent, verify the execution.
+
+> **Adversarial posture (post-flight):** The implementer may have cut corners, misunderstood the criterion, or made optimistic claims about completeness. Verify every claim independently against the actual code. Don't trust the implementer's report — read the files. If the report says "all tests pass," run the tests yourself.
 
 ---
 
@@ -440,27 +442,32 @@ Run silently — fix any failures before spawning agents:
 
 ### Spawn Three Agents (all in a single message)
 
-**1. Verifier** (`subagent_type: "harambe:verifier"`):
+**Adversarial posture (all validation agents):** Include in every spawn prompt: "The builder may have missed requirements, introduced regressions, or left security gaps. Verify independently against the spec and codebase — do not trust the build report or assume completeness."
+
+**1. Verifier** (`subagent_type: "verifier"`):
 ```
 Verify the build for feature '{feature-name}'.
 Spec path: .claude/specs/{feature}.md
 Test command: {test command}
 Session log summary: {PROBLEM/FIX entries, adaptations, amendments, inline decisions}
+NOTE: The builder may have checked off criteria prematurely. Re-verify each criterion against actual code, not the builder's claims.
 ```
 
-**2. Build Security** (`subagent_type: "harambe:build-security"`):
+**2. Build Security** (`subagent_type: "build-security"`):
 ```
 Security scan for feature '{feature-name}'.
 Spec path: .claude/specs/{feature}.md
 Files created or modified: {file list}
+NOTE: Assume the builder did not think about security. Check every input path, auth boundary, and data flow.
 ```
 
-**3. Build Regression** (`subagent_type: "harambe:build-regression"`):
+**3. Build Regression** (`subagent_type: "build-regression"`):
 ```
 Regression check for feature '{feature-name}'.
 Spec path: .claude/specs/{feature}.md
 Files created or modified: {file list}
 Test command: {test command}
+NOTE: The builder focused on new functionality. Check that existing behavior is preserved — run the full test suite, not just new tests.
 ```
 
 ### Wait for All Agents

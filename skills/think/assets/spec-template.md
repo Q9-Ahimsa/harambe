@@ -3,6 +3,7 @@
 **Created:** {date}
 **Status:** draft | ready | building | complete
 **Session:** {feature-name}.{n}
+**Design:** {.claude/specs/{feature}-design.md, or omit if no design doc was consumed}
 **Desc:** {single-line summary of the outcome — what, not how}
 
 ---

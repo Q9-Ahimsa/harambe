@@ -1,6 +1,6 @@
 ---
 name: think
-description: Explore the problem space, align on scope, research codebase and external best practices, then produce a spec for /do to execute. Use for any non-trivial work.
+description: "Universal thinking entry point for all non-trivial work. Explores the problem space, produces a spec, and hands off to /do. Narrates its process for transparency — the user watches thinking unfold and gets asked only for senior-level decisions. Triggers on: think, explore, discuss, plan, debug, investigate, what should we, how should we."
 ---
 
 # /think
@@ -93,7 +93,7 @@ Mark every phase transition with a visual separator:
 ─── Phase: {Name} ──────────────────────────
 ```
 
-Phases in order: **Orient → Alignment → Research → Design Conversation → Spec → Quality Gate → Mark Ready → Report**
+Phases in order: **Orient → Alignment → Research → Design Conversation → Spec → Quality Gate → Execution Planning → Mark Ready → Close Out → Report**
 
 Not every session hits every phase. Always mark the ones you enter.
 
@@ -112,10 +112,34 @@ Read `.claude/feedback.md` if it exists.
 Act on orient output in priority order:
 
 1. **Blocked builds** → A /do build hit a fundamental divergence. Surface it first: "Build for {feature} is blocked: {reason from session log}. Resolve before starting new work?" Read the BLOCKED: entry in session log for structured context.
-2. **Active work** → "You have active work on {feature}. Here's where you left off: {summary}. Continue or start new?"
-3. **Backlog items** → Surface briefly: "{N} backlog items: {summary}"
-4. **Feedback entries** → Note relevant spec accuracy patterns silently (use them when writing the spec, don't report them here)
-5. **Nothing active** → Proceed to conversation
+2. **Ready design docs** → "Design doc ready for {feature}: {desc}. Loading it as input for speccing."
+3. **Active work** → "You have active work on {feature}. Here's where you left off: {summary}. Continue or start new?"
+4. **Backlog items** → Surface briefly: "{N} backlog items: {summary}"
+5. **Feedback entries** → Note relevant spec accuracy AND design accuracy patterns silently (use them when writing the spec, don't report them here)
+6. **Nothing active** → Proceed to conversation
+
+### Design Doc Consumption
+
+If a `ready` design doc exists for the feature (`.claude/specs/{feature}-design.md`):
+1. Read the full design doc
+2. Load its required bones (Goal, Scope, Approach, Open Questions) as context
+3. Skip or lighten Alignment — the design doc established shared understanding (see Alignment below)
+4. Use Open Questions to focus Research
+5. Reference the design doc path in the spec's `Design:` field
+
+### /feel Routing
+
+If the user's request is **exploratory** and no design doc exists, suggest /feel. But **don't route if any of these are true** — proceed with normal alignment instead:
+
+- User provided a specific issue/ticket number
+- User described a concrete bug to fix
+- User stated goal, scope, and approach unprompted
+- Request is a refactor of existing code with clear target state
+- User explicitly says they're clear on what they want
+
+If none of those apply and the request feels vague: "This sounds like it needs some design exploration first. Run /feel to nail down what we're building, then come back to /think. Or if you have enough clarity, I can proceed with alignment here."
+
+Let the user decide. Don't insist.
 
 For resumption: grep prior session log entries for the feature, read existing spec, read listed FILES.
 
@@ -125,7 +149,9 @@ For resumption: grep prior session log entries for the feature, read existing sp
 
 Establish shared understanding before exploring solutions.
 
-**Skip if:** User arrives fully-specified (goal, scope, constraints, approach all explicit), OR feature already has `ALIGNED:` checkpoint in session log from a prior session.
+**Skip if:** User arrives fully-specified (goal, scope, constraints, approach all explicit), OR feature already has `ALIGNED:` checkpoint in session log from a prior session, OR a `ready` design doc exists and provides all required bones (Goal, Scope, Approach, Open Questions).
+
+**When skipping due to design doc:** Derive the ALIGNED checkpoint from the design doc's content. Map: design doc Goal → GOAL, Scope → SCOPE, Constraints → CONSTRAINTS (if present), Risks → RISKS (if present), Approach → APPROACH, Open Questions → OPEN. Write the ALIGNED checkpoint to session log.
 
 ### Mechanism
 
@@ -172,6 +198,7 @@ Ground the design in facts — codebase patterns and external best practices.
 
 Spawn `research-internal` agent with feature name and ALIGNED checkpoint.
 Include in the prompt: "Use `sg` (ast-grep) via Bash for structural code search — function signatures, call sites, class definitions, decorator usage. Prefer over grep when nesting/whitespace would defeat regex."
+If a design doc was consumed, include in the prompt: "Design doc context — Approach: {approach from design doc}. Open Questions to resolve: {open questions from design doc}. Focus research on verifying the approach and resolving these questions."
 Writes to `.claude/specs/{feature}-research-internal.md`.
 
 ### External Research — Decision Flow
@@ -322,6 +349,8 @@ Run the spec through independent review. The same context that produced the spec
 
 Spawn prompt: `Review the spec at: .claude/specs/{feature}.md | Source files: {list} | Session context: {entry ID}`
 
+> **Adversarial posture (all quality gate agents):** Include in every spawn prompt: "The spec author may have made optimistic claims, missed edge cases, or assumed things about the codebase that aren't true. Verify every claim independently against actual code. Do not trust summaries — read the source files. If a claim can't be verified, flag it."
+
 ### Synthesize (autonomous)
 
 - **Critical issues** → fix in spec. Re-verify changed sections.
@@ -332,12 +361,19 @@ Narrate: "Quality gate: {N} agents ran. {critical count} critical fixes applied.
 
 ### Route After Gate
 
-Re-read the spec file and count Done Criteria + Files:
+Re-read the spec file and assess structurally:
 
 ```
-≤3 criteria AND ≤3 files → Mark Ready
->3 criteria OR  >3 files → Execution Planning
+Execution Planning triggers when BOTH:
+  1. 2+ independent work streams exist
+     (criteria naturally group into chunks that don't share files)
+  2. Parallelization saves meaningful time
+     (5+ sequential subagent dispatches would be avoided)
+
+Otherwise → Mark Ready (sequential mode in /do)
 ```
+
+Narrate: "Checking execution planning: {N} criteria, {assessment}. Going {sequential/wave} because {reason}." The user can override.
 
 ---
 
@@ -363,6 +399,40 @@ Set spec status to `ready`.
 
 ---
 
+## Close Out
+
+> **Runs after Mark Ready, before the Report.** Archives consumed artifacts and writes feedback.
+
+### Archive Design Doc (if consumed)
+
+If /think consumed a design doc from /feel:
+1. Create `.claude/specs/archive/` if needed
+2. Add `**Consumed:** {date}` and `**Spec:** {feature}.md` to design doc metadata
+3. Move design doc to `.claude/specs/archive/`
+
+### Write Design Accuracy Feedback
+
+If a design doc was consumed, append to `.claude/feedback.md` under `## Design Accuracy` (create section if it doesn't exist):
+
+```markdown
+- [{date}] {feature}: {what the design doc got right or wrong, and how /think corrected it}
+```
+
+Cap at 15 entries. Prune oldest when adding new ones. /feel reads these in future sessions.
+
+### Update Session Log
+
+Set status to `complete`. Append SPEC path and completion summary.
+
+### Checkpoint Checklist
+
+1. Session log current?
+2. Design doc archived? (if consumed)
+3. Feedback written? (if design doc consumed)
+4. Spec status set to `ready`?
+
+---
+
 ## Post-Hoc Report
 
 Present a structured summary at the end. This is how the user builds their mental model without having to babysit:
@@ -384,7 +454,8 @@ Risks: {top risk and what makes it risky}
 
 Quality Gate: {N} agents, {findings summary}
 Autonomy: {N} auto-decisions, {M} user-decisions
-Feedback applied: {spec accuracy patterns used, or "none"}
+Design Doc: {consumed and archived, or "none — direct /think"}
+Feedback applied: {spec accuracy + design accuracy patterns used, or "none"}
 
 → Run /do to build.
 ────────────────────────────────────────────

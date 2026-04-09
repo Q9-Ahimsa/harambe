@@ -1,0 +1,72 @@
+# Design: {feature-name}
+
+**Created:** {date}
+**Status:** draft | ready | consumed
+**Session:** {feature-name}.{n}
+**Desc:** {single-line summary — the outcome in user terms}
+
+---
+
+## Goal
+
+{What we're building and why. The problem it solves. 2-3 sentences max.}
+
+## Scope
+
+**In:**
+- {what's included}
+
+**Out:**
+- {what's explicitly excluded and why}
+
+## Approach
+
+{The chosen approach and why it was chosen over alternatives. Include enough reasoning that a fresh /think session won't second-guess it.}
+
+## Open Questions
+
+> /think resolves these through research. Each should say what kind of answer is needed.
+
+- {question} — needs: {codebase pattern / external best practice / user decision / research}
+
+> If none: "None — ready to spec."
+
+---
+
+> The sections below are optional. Include when the /feel conversation produced them. Don't manufacture content for empty sections.
+
+## Motivation
+
+{What triggered this work. User need, pain point, opportunity, incident. Why now.}
+
+## Approaches Considered
+
+### {Approach A} (chosen)
+{Why it was chosen.}
+
+### {Approach B} (rejected)
+{Why it was rejected. What would change to make it viable.}
+
+## Key Decisions
+
+- **{Decision}** — {rationale}
+
+## Constraints
+
+- {constraint — hard limits that can't be negotiated}
+
+## Risks
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| {risk} | {what breaks} | {how to address} |
+
+## Success Criteria
+
+> In user-facing terms, not implementation terms. /think translates these into technical Done Criteria.
+
+- {criterion}
+
+## Notes
+
+{Freeform catch-all for insights that don't fit other sections.}
