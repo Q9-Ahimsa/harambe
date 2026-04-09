@@ -1,5 +1,6 @@
 # Spec: {feature-name}
 
+**Type:** spec
 **Created:** {date}
 **Status:** draft | ready | building | complete
 **Session:** {feature-name}.{n}

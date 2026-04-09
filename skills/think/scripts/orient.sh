@@ -55,6 +55,7 @@ if [ -d ".claude/specs" ]; then
     [ -f "$spec_file" ] || continue
     fname=$(basename "$spec_file")
     [[ "$fname" == *-research-*.md ]] && continue
+    [[ "$fname" == *-design.md ]] && continue
     status=$(spec_field "$spec_file" "Status")
     desc=$(spec_field "$spec_file" "Desc")
     [ -z "$desc" ] && desc="(no desc)"

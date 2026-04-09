@@ -1,5 +1,6 @@
 # Design: {feature-name}
 
+**Type:** design
 **Created:** {date}
 **Status:** draft | ready | consumed
 **Session:** {feature-name}.{n}

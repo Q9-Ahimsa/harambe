@@ -13,6 +13,8 @@ The feeling-out phase. One job: **explore a vague idea until it's clear enough t
 
 > **/feel does NOT invoke /think.** When the design doc is ready, tell the user to run `/think` themselves. The handoff is explicit and user-initiated.
 
+> **/feel NEVER recommends skipping /think.** Even when all dimensions are crisp and the design doc looks complete, /think adds research, assumption verification, quality gate review, and done criteria. A design doc captures intent. A spec captures an executable plan. They are different artifacts with different jobs.
+
 /feel's outputs are strictly:
 - **Design docs** (`.claude/specs/{feature}-design.md`)
 - **Session log entries** (`.claude/session.log`)
@@ -73,7 +75,7 @@ Ask 2-3 adaptive questions that probe these dimensions. Don't ask them literally
 
 ### After Triage
 
-**All dimensions crisp →** Quick capture. Write the required bones of the design doc from what the user already told you. Confirm with the user. Proceed to Self-Review, then exit with handoff.
+**All dimensions crisp →** Quick capture. Write the required bones of the design doc from what the user already told you. Confirm with the user. Proceed to Self-Review, then exit with handoff. **Still hand off to /think** — even a crisp idea needs research grounding, assumption verification, a quality gate, and done criteria before it's executable.
 
 **Any dimension vague →** Continue into full Scaffolding on the vague dimensions. The crisp dimensions become anchors — don't re-explore them.
 
@@ -203,6 +205,8 @@ Design Doc: .claude/specs/{feature}-design.md
 ```
 
 > **Don't ask permission to write the report.** You've been exploring together — the user knows what's coming. Write the doc, present it, hand off.
+>
+> **The handoff is ALWAYS to /think.** Never suggest going directly to /do — not even when the design doc is comprehensive. /think adds research, assumption verification, quality gate review, and executable done criteria. Those steps cannot be skipped.
 
 ---
 

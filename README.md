@@ -1,8 +1,8 @@
 # harambe
 
-Structured think-then-do development workflow for Claude Code. Spec-driven, TDD-first, with autonomous subagent execution, multi-agent validation, and a cross-session learning loop.
+Structured feel-think-do development workflow for Claude Code. Scaffolded exploration, spec-driven planning, TDD execution, with adversarial review, subagent orchestration, and a three-phase learning loop.
 
-Monkey think, monkey do.
+Monkey feel, monkey think, monkey do.
 
 ## Install
 
@@ -24,9 +24,9 @@ claude --plugin-dir /path/to/think-do
 
 | Command | What it does |
 |---------|-------------|
+| `/harambe:feel` | Scaffolded exploration for unclear ideas — produces a design doc that /think consumes |
 | `/harambe:think` | Explore the problem space, align on scope, research codebase + external best practices, produce a spec |
 | `/harambe:do` | Execute a spec with TDD discipline — subagent per criterion, multi-agent validation, PR creation, close-out |
-| `/harambe:align` | Standalone deep interview — surfaces implicit assumptions through structured questioning |
 | `/harambe:pr-review` | Blind 4-agent parallel code review (correctness, security, performance, style) |
 | `/harambe:decompose` | Break a spec into agent-sized tasks with file ownership and dependencies |
 | `/harambe:parallelize` | Wave scheduling, contracts, and agent prompt generation for parallel execution |
@@ -34,11 +34,15 @@ claude --plugin-dir /path/to/think-do
 ### The core loop
 
 ```
+/harambe:feel "vague idea"          (optional — skip if you already know what to build)
+  → scaffolds your thinking through conversation
+  → produces a design doc
+
 /harambe:think "feature description"
-  → aligns on scope
-  → researches codebase + external docs
+  → consumes design doc (if one exists)
+  → aligns on scope, researches codebase + external docs
   → explores design with you
-  → writes a spec
+  → writes a spec with adversarial quality gate
 
 /harambe:do
   → picks up the spec
@@ -57,12 +61,16 @@ Why: `/harambe:do` spawns subagents aggressively — one per Done Criteria item,
 The spec is the handoff mechanism. `/harambe:think` writes it to disk. `/harambe:do` reads it from disk. They don't need to share a conversation.
 
 ```
-# Session 1
+# Session 1 (optional — skip if you know what to build)
+/harambe:feel "I want some kind of auth system"
+# → design doc written to .claude/specs/auth-design.md
+
+# Session 2
 /harambe:think "add user authentication"
-# → spec written to .claude/specs/add-user-authentication.md
+# → consumes design doc, spec written to .claude/specs/add-user-authentication.md
 # → close this session
 
-# Session 2 (fresh context)
+# Session 3 (fresh context)
 /harambe:do
 # → picks up the ready spec automatically
 # → full context available for subagent work
@@ -72,11 +80,23 @@ If you're running multiple features in parallel, use separate terminal tabs — 
 
 ## How it works
 
+### /feel phases (optional)
+
+**Orient** — Reads design state: active feel sessions, existing design docs, backlog, design accuracy feedback from prior cycles.
+
+**Triage** — Gauges clarity across three dimensions (goal, scope, risk/complexity). If all crisp, does quick capture and hands off. If any vague, continues into full scaffolding.
+
+**Scaffold** — One question at a time, proposing options, building shared understanding. Names assumptions, proposes approaches, gets explicit approval.
+
+**Design Doc** — Writes to `.claude/specs/{feature}-design.md` with required bones: Goal, Scope, Approach, Open Questions. Optional sections included when the conversation produced them.
+
+**Handoff** — Always to /think. Never recommends skipping to /do.
+
 ### /think phases
 
-**Orient** — Reads project state: active work, specs, backlog, feedback from prior builds.
+**Orient** — Reads project state: active work, specs, design docs, backlog, feedback from prior builds.
 
-**Align** — Structured interview using AskUserQuestion. Surfaces scope, constraints, risks. Produces an ALIGNED checkpoint. Skipped if you arrive fully-specified.
+**Align** — Structured interview using AskUserQuestion. Surfaces scope, constraints, risks. Produces an ALIGNED checkpoint. Skipped if you arrive fully-specified or a design doc provides all required bones.
 
 **Research** — Spawns a codebase research agent (always) and an external best-practices agent (when the domain is unfamiliar or high-risk). Both write research briefs to disk.
 
@@ -84,7 +104,7 @@ If you're running multiple features in parallel, use separate terminal tabs — 
 
 **Spec** — Writes a spec to `.claude/specs/`. Every assumption is verified against actual code. Template includes: What, Approach, Key Decisions, Constraints, Files, Interfaces, Assumptions (verified), Done Criteria.
 
-**Quality Gate** — 2-6 independent agents review the spec for completeness, assumption accuracy, architecture, security, performance, and impact. Critical issues are fixed; suggestions are presented.
+**Quality Gate** — 2-6 independent agents review the spec with adversarial posture for completeness, assumption accuracy, architecture, security, performance, and impact. Critical issues are fixed; suggestions are presented.
 
 **Execution Planning** — For complex specs (>3 criteria or >3 files), decomposes into tasks and generates a wave schedule with contracts.
 
@@ -108,14 +128,17 @@ If you're running multiple features in parallel, use separate terminal tabs — 
 
 **Close Out** — Squash merge (with your confirmation), extract learnings, write feedback, archive spec.
 
-### The learning loop
+### The three-phase learning loop
 
-`/do` writes to `.claude/feedback.md` at close-out:
-- **Spec accuracy** — what the spec got wrong (max 15 entries)
+`/do` writes **spec accuracy** to `.claude/feedback.md` — what the spec got wrong. `/think` reads it before writing the next spec.
+
+`/think` writes **design accuracy** to `.claude/feedback.md` — what the design doc got wrong. `/feel` reads it before the next exploration.
+
+`/do` also writes:
 - **Autonomy table** — which decisions can be auto-approved based on track record
 - **Patterns** — cross-feature learnings proposed by the learn agent
 
-`/think` reads `feedback.md` before writing the next spec. The system gets smarter each cycle.
+Each phase learns from the phase downstream. The system gets smarter each cycle.
 
 ## Agents
 
@@ -165,14 +188,15 @@ For the full workflow experience, add these lines to your project's `.claude/CLA
 ```markdown
 ## Workflow
 
-### /harambe:think + /harambe:do
+### /harambe:feel + /harambe:think + /harambe:do
 - Trivial tasks: just do them. No ceremony
-- `/harambe:think`: explore, discuss, produce spec. Pauses only for senior-level decisions
+- `/harambe:feel`: scaffolded exploration for unclear ideas. Produces design doc
+- `/harambe:think`: explore, discuss, produce spec. Consumes design doc if present. Pauses only for senior-level decisions
 - `/harambe:do`: execute spec with TDD. Resolves divergences inline. Full stop only if approach is broken
 - Auto-decide: tests, security review, lint, quality gates, archival. Fix findings, don't ask
 - Ask me: scope changes, genuine tradeoffs, architecture choices
 - **While we're here**: when touching a file, fix all visible issues
-- **Feedback loop**: /do writes spec accuracy + autonomy data to `.claude/feedback.md`. /think reads it next cycle
+- **Feedback loop**: /do writes spec accuracy → /think reads it. /think writes design accuracy → /feel reads it. Three-phase learning
 
 ### Session Log
 - Append-only at `.claude/session.log`. Query with grep, never read full file
@@ -248,13 +272,14 @@ The workflow creates these files in your project's `.claude/` directory:
 ```
 .claude/
   session.log          # Append-only session history
-  feedback.md          # Learning loop: spec accuracy, autonomy, patterns
+  feedback.md          # Learning loop: spec accuracy, design accuracy, autonomy, patterns
   backlog.md           # Deferred out-of-scope work
   specs/
-    {feature}.md       # Active specs
+    {feature}-design.md               # Design docs from /feel
+    {feature}.md                      # Specs from /think
     {feature}-research-internal.md
     {feature}-research-external.md
-    archive/           # Completed specs and research briefs
+    archive/                          # Consumed design docs and completed specs
 ```
 
 Add `.claude/` to `.gitignore` — these are local workflow state, not source code.
@@ -263,7 +288,7 @@ Add `.claude/` to `.gitignore` — these are local workflow state, not source co
 
 **Glass cockpit.** You watch the process unfold. You get asked only for senior-level decisions — scope, genuine tradeoffs, architecture. Everything mechanical is auto-decided and narrated.
 
-**Spec as message bus.** All communication between /think and /do flows through persistent artifacts (specs, session log, feedback). No conversation state dependency. Survives context compaction.
+**Artifacts as message bus.** All communication between phases flows through persistent artifacts — design docs, specs, session log, feedback. No conversation state dependency. Survives context compaction.
 
 **Subagents are disposable labor.** Main context is the orchestrator — precious working memory. Subagents get exact file contents, exact interfaces, exact rules. Their output is validated like a PR from a junior developer.
 

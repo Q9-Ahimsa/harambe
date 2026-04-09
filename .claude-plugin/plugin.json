@@ -1,6 +1,6 @@
 {
   "name": "harambe",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Feel-think-do development workflow. Scaffolded exploration, spec-driven planning, TDD execution, with adversarial review, subagent orchestration, and a three-phase learning loop.",
   "author": {
     "name": "harambe contributors"
