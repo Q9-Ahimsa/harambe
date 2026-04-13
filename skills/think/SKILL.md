@@ -26,6 +26,8 @@ The thinking phase. One job: **explore the problem space thoroughly, then produc
 - **Feedback updates** (`.claude/feedback.md`)
 - **Pattern escalations** (project `CLAUDE.md`)
 
+> **Artifact scope: design docs (inputs) + specs (own outputs).** /think reads `*-design.md` (consumed from /feel) and `{feature}.md` (its own past specs in flight). It writes specs and archives consumed design docs. /think doesn't touch research briefs from past sessions unless the current spec depends on them.
+
 The spec is the **message bus** between /think and /do. All communication flows through persistent artifacts.
 
 > **If you feel the urge to "just quickly fix this" — stop. Write it into the spec.**
@@ -57,9 +59,26 @@ These are things previous specs got wrong. Before writing a new spec:
 
 ### Autonomy Table
 
-Check which decision types have been approved for auto-decision. Use this to calibrate when to pause vs narrate-and-proceed during alignment and design conversation. The autonomy table is **shared with /do** — both phases read and write it. Rows are keyed by behavior name; /think's behaviors are prefixed with their context (e.g., `alignment-completeness`, `research-scope`, `spec-approach`, `feel-routing`). /do's behaviors use names like `archival`, `while-we're-here`, `checkpoint-before-merge`.
+Check which decision types have been approved for auto-decision. Use this to calibrate when to pause vs narrate-and-proceed during alignment and design conversation. The autonomy table is **shared with /do** — both phases read and write it. Rows are tagged with a `Phase` column (`think` or `do`) so ownership is unambiguous. /think owns rows like `alignment-completeness`, `research-scope`, `spec-approach`, `feel-routing`. /do owns rows like `archival`, `while-we're-here`, `checkpoint-before-merge`.
 
 **Also check correction entries.** These are concrete instances where the user had to catch a mistake. If there are correction entries relevant to spec writing (e.g., "spec assumed file existed without checking"), be extra vigilant about those specific behaviors.
+
+### Reading the Autonomy Table
+
+The table mixes /think and /do rows. **Read them differently:**
+
+**Your own rows** (where `Phase` is `think`): calibrate your behavior.
+- High `+` count with `Auto: yes` → keep auto-deciding this behavior
+- High `-` count → pause more, ask the user
+
+**Other phase's rows** (where `Phase` is `do`): treat as **information about /do's struggles**, NOT as prescriptive rules for /think.
+- They tell you what /do has been correcting itself on
+- Use them to write better specs that prevent /do's pain points
+- Do NOT adopt /do's behaviors as your own
+- Do NOT transfer /do's auto-decision thresholds to /think's behaviors
+- Do NOT narrate /do's corrections as if they were /think's
+
+**Example of correct cross-phase reading:** /think sees `do | while-we're-here | correction × 3 | "skipped pyright errors in owned files"`. The right inference is: "/do is being corrected on scope-of-fixes when touching files. I should write specs with more explicit scope boundaries — list the fixes /do should and shouldn't make alongside the main change — to reduce /do's judgment calls." NOT: "I should be more aggressive about touching files in /think."
 
 ### Patterns
 
@@ -463,22 +482,22 @@ For each /think judgment-light decision auto-decided this session:
 
 If you wrote correction entries during the session via Real-Time Correction Tracking, they're already in the table. At Close Out, just verify they're current. If you noticed a correction at the end that didn't get logged in real-time, add it now.
 
-**Append to `.claude/feedback.md`** — same shared table as /do's Write Feedback section. Example:
+**Append to `.claude/feedback.md`** — same shared table as /do's Write Feedback section. Example with the Phase column:
 
 ```markdown
 ## Autonomy
-| Behavior                 | Type       | Auto | +  | -  | Last -                                       |
-|--------------------------|------------|------|----|----|----------------------------------------------|
-| alignment-completeness   | decision   | no   | 2  | 1  | "should have asked about edge cases"         |
-| research-scope           | decision   | yes  | 4  | 0  | —                                            |
-| spec-approach            | decision   | no   | 1  | 2  | "user wanted approach B not A"               |
-| quality-gate-suggestions | decision   | no   | 2  | 1  | "skip the naming nit"                        |
-| feel-routing             | correction | —    | —  | 1  | "should have suggested /feel — too vague"    |
-| archival                 | decision   | yes  | 4  | 0  | —                                            |
-| while-we're-here         | correction | —    | —  | 3  | "skipped pyright errors in owned files"      |
+| Phase | Behavior                 | Type       | Auto | +  | -  | Last -                                       |
+|-------|--------------------------|------------|------|----|----|----------------------------------------------|
+| think | alignment-completeness   | decision   | no   | 2  | 1  | "should have asked about edge cases"         |
+| think | research-scope           | decision   | yes  | 4  | 0  | —                                            |
+| think | spec-approach            | decision   | no   | 1  | 2  | "user wanted approach B not A"               |
+| think | quality-gate-suggestions | decision   | no   | 2  | 1  | "skip the naming nit"                        |
+| think | feel-routing             | correction | —    | —  | 1  | "should have suggested /feel — too vague"    |
+| do    | archival                 | decision   | yes  | 4  | 0  | —                                            |
+| do    | while-we're-here         | correction | —    | —  | 3  | "skipped pyright errors in owned files"      |
 ```
 
-> Rows for `archival`, `while-we're-here`, etc. belong to /do — leave them alone. /think only writes its own rows.
+> /think only writes rows where `Phase` is `think`. Leave /do's rows untouched. If a row has no `Phase` value (legacy entry from before the column existed), assume it's /do's and don't modify it.
 
 ### Update Session Log
 

@@ -24,6 +24,8 @@ The feeling-out phase. One job: **scaffold the user's decision-making until a va
 
 /feel **can** read code and explore the codebase — observation, not mutation.
 
+> **Artifact scope: design docs only.** /feel reads and writes design docs (`*-design.md`). It does NOT read specs (`{feature}.md` without the `-design` suffix) — those are downstream of /feel's scope, owned by /think and /do. If a spec exists for a feature you're exploring, that's a signal the feature is past the design phase — ask the user whether to revisit it via /feel or jump to /think.
+
 > **If you feel the urge to start speccing or coding — stop. Write it into the design doc.**
 
 ---

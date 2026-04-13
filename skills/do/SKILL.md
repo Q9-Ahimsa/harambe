@@ -11,6 +11,8 @@ The doing phase. One job: **take a spec and turn it into working, tested code.**
 
 > **/do does NOT invoke /think.** When a divergence needs a design decision, /do pauses, asks the user directly via AskUserQuestion, and continues. The only full stop: when the entire spec approach is fundamentally broken and needs re-speccing.
 
+> **Artifact scope: specs only.** /do reads specs (`{feature}.md`) and writes code + commits + feedback. It does NOT read design docs (`*-design.md`) — those are upstream of /do's scope, owned by /feel and /think. The orient script filters them out automatically. If you somehow encounter a design doc, that's a signal /think hasn't run yet — ask the user to run /think first.
+
 ---
 
 ## Hard Rules
@@ -709,7 +711,7 @@ Append to `.claude/feedback.md` (create with section headers if it doesn't exist
 ```
 Cap at 15 entries. Prune oldest when adding new ones.
 
-**Autonomy Table** — two kinds of entries, same table. **Shared with /think** — both phases read and write it. Rows are keyed by behavior name. /do owns rows like `archival`, `while-we're-here`, `checkpoint-before-merge`. /think owns rows like `alignment-completeness`, `research-scope`, `spec-approach`. **Don't touch /think's rows from /do** — only update or create your own.
+**Autonomy Table** — two kinds of entries, same table. **Shared with /think** — both phases read and write it. Rows are tagged with a `Phase` column (`do` or `think`) so ownership is unambiguous. /do owns rows where `Phase` is `do`. /think owns rows where `Phase` is `think`. **Don't touch /think's rows from /do** — only update or create your own.
 
 *Decision entries* — tracks auto-decision calibration:
 - Increment `+` for decisions where user confirmed or rubber-stamped
@@ -725,15 +727,27 @@ Cap at 15 entries. Prune oldest when adding new ones.
 
 ```markdown
 ## Autonomy
-| Behavior                  | Type       | Auto | +  | -  | Last -                                          |
-|--------------------------|------------|------|----|----|--------------------------------------------------|
-| archival                 | decision   | yes  | 4  | 0  | —                                                |
-| quality-gate-suggestions | decision   | no   | 2  | 1  | "skip the naming nit"                            |
-| checkpoint-before-merge  | correction | —    | —  | 1  | "jumped to merge without checking branch status" |
-| while-we're-here         | correction | —    | —  | 3  | "skipped pyright errors in owned files"          |
-| alignment-completeness   | decision   | no   | 2  | 1  | "should have asked about edge cases" (think)     |
-| research-scope           | decision   | yes  | 4  | 0  | — (think)                                        |
+| Phase | Behavior                 | Type       | Auto | +  | -  | Last -                                          |
+|-------|--------------------------|------------|------|----|----|--------------------------------------------------|
+| do    | archival                 | decision   | yes  | 4  | 0  | —                                                |
+| do    | quality-gate-suggestions | decision   | no   | 2  | 1  | "skip the naming nit"                            |
+| do    | checkpoint-before-merge  | correction | —    | —  | 1  | "jumped to merge without checking branch status" |
+| do    | while-we're-here         | correction | —    | —  | 3  | "skipped pyright errors in owned files"          |
+| think | alignment-completeness   | decision   | no   | 2  | 1  | "should have asked about edge cases"             |
+| think | research-scope           | decision   | yes  | 4  | 0  | —                                                |
 ```
+
+> /do only writes rows where `Phase` is `do`. Leave /think's rows untouched. If a row has no `Phase` value (legacy entry from before the column existed), assume it's /do's and don't modify it without verifying.
+
+**Reading the Autonomy Table at orient** — the table mixes /do and /think rows. Read them differently:
+
+- **Your own rows** (`Phase: do`): calibrate /do's behavior — high `+` count means keep auto-deciding, high `-` count means pause more.
+- **/think's rows** (`Phase: think`): treat as **information about /think's struggles**, NOT as prescriptive rules for /do.
+  - Use them to spot likely spec gaps. If /think has been corrected on `alignment-completeness`, be alert to spec underspecification — ask the user about scenarios the spec doesn't cover before assuming.
+  - Do NOT adopt /think's behaviors as your own.
+  - Do NOT narrate /think's corrections as if they were /do's.
+
+**Example of correct cross-phase reading:** /do sees `think | alignment-completeness | correction × 2 | "missed edge cases"`. The right inference is: "/think has been catching itself missing edge cases at alignment time. The current spec might also have unmodeled edges — pause before auto-fixing if behavior under unusual input is ambiguous." NOT: "I should write more thorough alignment checkpoints during /do."
 
 **Patterns** — add learn agent's approved proposals to the Patterns staging area.
 
