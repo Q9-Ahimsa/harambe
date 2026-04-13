@@ -179,6 +179,8 @@ Get explicit approval before proceeding to design doc writing.
 
 Use the template at [design-template.md](./assets/design-template.md). Fill the required bones. Add optional sections based on what the conversation produced — **don't manufacture content for empty sections.**
 
+> **FORMAT IS PROTOCOL.** Use the template's bold-asterisk frontmatter format literally: `**Type:** design`, `**Status:** ready`, `**Desc:** ...`, etc. Do NOT use YAML frontmatter (`---\nstatus: ready\n---`) even if the project's other markdown files do. /think's orient script parses these fields to detect ready design docs — drifting from the format causes /think to silently miss the doc. The orient script has a YAML fallback for safety, but the canonical format is bold-asterisk.
+
 ### Required Bones (always present)
 
 | Section | What it captures | /think depends on this |

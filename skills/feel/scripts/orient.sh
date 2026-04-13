@@ -23,12 +23,40 @@ extract_entries() {
   '
 }
 
-# Extract a frontmatter field value from a markdown file
+# Extract a frontmatter field value from a spec or design doc
 # $1 = file path, $2 = field name (e.g., "Status", "Desc")
+# Tries bold-asterisk format first (**Field:** value), then falls back to
+# YAML frontmatter (case-insensitive). This handles drift where /feel writes
+# YAML-style frontmatter instead of the template's bold-asterisk format.
 spec_field() {
-  local line
-  line=$(grep -m1 "^\*\*${2}:\*\*" "$1" 2>/dev/null || true)
-  [ -n "$line" ] && echo "$line" | sed "s/\*\*${2}:\*\* *//" | tr -d '\r\`'
+  local file="$1" field="$2" line
+  [ -f "$file" ] || return 0
+
+  # Format 1: bold-asterisk — **Field:** value
+  line=$(grep -m1 "^\*\*${field}:\*\*" "$file" 2>/dev/null || true)
+  if [ -n "$line" ]; then
+    echo "$line" | sed "s/\*\*${field}:\*\* *//" | tr -d '\r\`'
+    return 0
+  fi
+
+  # Format 2: YAML frontmatter (between --- markers, case-insensitive field)
+  awk -v field="$field" '
+    BEGIN { lc_field = tolower(field); in_yaml = 0 }
+    /^---[[:space:]]*$/ {
+      if (in_yaml) exit
+      in_yaml = 1
+      next
+    }
+    in_yaml {
+      lc_line = tolower($0)
+      if (lc_line ~ "^[[:space:]]*"lc_field"[[:space:]]*:") {
+        sub(/^[[:space:]]*[^:]+:[[:space:]]*/, "")
+        gsub(/^["\047]|["\047]$/, "")
+        print
+        exit
+      }
+    }
+  ' "$file" | tr -d '\r\`'
   return 0
 }
 

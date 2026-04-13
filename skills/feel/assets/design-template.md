@@ -1,5 +1,11 @@
 # Design: {feature-name}
 
+<!--
+FORMAT IS PROTOCOL: Use these exact bold-asterisk fields. Do NOT convert to
+YAML frontmatter (---/---) even if the project's other files use YAML.
+/think's orient script parses these fields to detect ready design docs.
+-->
+
 **Type:** design
 **Created:** {date}
 **Status:** draft | ready | consumed
