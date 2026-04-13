@@ -57,13 +57,31 @@ These are things previous specs got wrong. Before writing a new spec:
 
 ### Autonomy Table
 
-Check which decision types have been approved for auto-decision. Use this to calibrate when to pause vs narrate-and-proceed during alignment and design conversation.
+Check which decision types have been approved for auto-decision. Use this to calibrate when to pause vs narrate-and-proceed during alignment and design conversation. The autonomy table is **shared with /do** — both phases read and write it. Rows are keyed by behavior name; /think's behaviors are prefixed with their context (e.g., `alignment-completeness`, `research-scope`, `spec-approach`, `feel-routing`). /do's behaviors use names like `archival`, `while-we're-here`, `checkpoint-before-merge`.
 
 **Also check correction entries.** These are concrete instances where the user had to catch a mistake. If there are correction entries relevant to spec writing (e.g., "spec assumed file existed without checking"), be extra vigilant about those specific behaviors.
 
 ### Patterns
 
 Read the staging area for cross-feature learnings. Apply relevant patterns to the current design.
+
+### Real-Time Correction Tracking
+
+> **When the user corrects /think behavior during a session, write to the autonomy table IMMEDIATELY — don't defer to Close Out.** Correction signal is too valuable to lose to a crash or context reset.
+
+Triggers that count as corrections:
+- User interrupts ("wait, you missed X", "you should have asked about Y")
+- User pushes back on an auto-decision ("don't auto-decide that, ask me")
+- User catches a skipped step ("did you actually read the file?", "you skipped research")
+- User flags a bad framing ("this isn't a yes/no question", "you're asking the wrong thing")
+
+For each correction:
+1. Identify the behavior name (`alignment-completeness`, `research-scope`, `spec-approach`, `feel-routing`, etc.)
+2. Find or create the row in the autonomy table
+3. Increment `-` and record the concrete reason in `Last -`
+4. Narrate the vigilance going forward: "Noted — I'll be extra careful about {behavior} for the rest of this session"
+
+Don't wait for Close Out. The user catching a mistake is the highest-quality signal in the system.
 
 ---
 
@@ -422,6 +440,46 @@ If a design doc was consumed, append to `.claude/feedback.md` under `## Design A
 
 Cap at 15 entries. Prune oldest when adding new ones. /feel reads these in future sessions.
 
+### Write Self Feedback
+
+> **/think tracks its own behavior, not just artifacts.** This section mirrors /do's Write Feedback. The autonomy table is shared between phases — both read and write it. Spec accuracy is /do's responsibility (don't double-write); /think only writes about /think's process.
+
+**Autonomy Table — decision entries** (track auto-decision calibration for /think behaviors):
+
+For each /think judgment-light decision auto-decided this session:
+- Increment `+` if user accepted or didn't push back
+- Increment `-` if user chose differently — record the reason in `Last -`
+- If a behavior crosses the threshold (judgment-light: 3 consecutive `+`), set `Auto` to `yes`
+- If user overrides an auto-approved behavior, reset `Auto` to `no` and zero the counters
+
+/think behaviors that go in this table:
+- `alignment-completeness` — was alignment thorough enough? Did /think auto-conclude alignment when it should have asked more?
+- `research-scope` — was the internal/external research decision right? Did /think skip external research and miss something?
+- `spec-approach` — when /think auto-decided approach because research was unambiguous, did the user agree?
+- `quality-gate-suggestions` — shared with /do, applies to suggestions raised by quality gate agents
+- `feel-routing` — when /think auto-decided whether to suggest /feel vs proceed with alignment
+
+**Autonomy Table — correction entries** (track behavioral violations):
+
+If you wrote correction entries during the session via Real-Time Correction Tracking, they're already in the table. At Close Out, just verify they're current. If you noticed a correction at the end that didn't get logged in real-time, add it now.
+
+**Append to `.claude/feedback.md`** — same shared table as /do's Write Feedback section. Example:
+
+```markdown
+## Autonomy
+| Behavior                 | Type       | Auto | +  | -  | Last -                                       |
+|--------------------------|------------|------|----|----|----------------------------------------------|
+| alignment-completeness   | decision   | no   | 2  | 1  | "should have asked about edge cases"         |
+| research-scope           | decision   | yes  | 4  | 0  | —                                            |
+| spec-approach            | decision   | no   | 1  | 2  | "user wanted approach B not A"               |
+| quality-gate-suggestions | decision   | no   | 2  | 1  | "skip the naming nit"                        |
+| feel-routing             | correction | —    | —  | 1  | "should have suggested /feel — too vague"    |
+| archival                 | decision   | yes  | 4  | 0  | —                                            |
+| while-we're-here         | correction | —    | —  | 3  | "skipped pyright errors in owned files"      |
+```
+
+> Rows for `archival`, `while-we're-here`, etc. belong to /do — leave them alone. /think only writes its own rows.
+
 ### Update Session Log
 
 Set status to `complete`. Append SPEC path and completion summary.
@@ -430,8 +488,9 @@ Set status to `complete`. Append SPEC path and completion summary.
 
 1. Session log current?
 2. Design doc archived? (if consumed)
-3. Feedback written? (if design doc consumed)
-4. Spec status set to `ready`?
+3. Design Accuracy feedback written? (if design doc consumed)
+4. Self feedback written? (autonomy decisions and any unrecorded corrections)
+5. Spec status set to `ready`?
 
 ---
 

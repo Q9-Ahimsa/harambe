@@ -709,7 +709,7 @@ Append to `.claude/feedback.md` (create with section headers if it doesn't exist
 ```
 Cap at 15 entries. Prune oldest when adding new ones.
 
-**Autonomy Table** — two kinds of entries, same table:
+**Autonomy Table** — two kinds of entries, same table. **Shared with /think** — both phases read and write it. Rows are keyed by behavior name. /do owns rows like `archival`, `while-we're-here`, `checkpoint-before-merge`. /think owns rows like `alignment-completeness`, `research-scope`, `spec-approach`. **Don't touch /think's rows from /do** — only update or create your own.
 
 *Decision entries* — tracks auto-decision calibration:
 - Increment `+` for decisions where user confirmed or rubber-stamped
@@ -731,6 +731,8 @@ Cap at 15 entries. Prune oldest when adding new ones.
 | quality-gate-suggestions | decision   | no   | 2  | 1  | "skip the naming nit"                            |
 | checkpoint-before-merge  | correction | —    | —  | 1  | "jumped to merge without checking branch status" |
 | while-we're-here         | correction | —    | —  | 3  | "skipped pyright errors in owned files"          |
+| alignment-completeness   | decision   | no   | 2  | 1  | "should have asked about edge cases" (think)     |
+| research-scope           | decision   | yes  | 4  | 0  | — (think)                                        |
 ```
 
 **Patterns** — add learn agent's approved proposals to the Patterns staging area.
