@@ -126,3 +126,8 @@ The invoker (not you) handles writing approved proposals to project CLAUDE.md. Y
 - **Propose project decisions as patterns.** "We use FastAPI" or "We chose PostgreSQL over MongoDB" are decisions, not gotchas. They belong in the project CLAUDE.md's architecture section, not Patterns & Gotchas.
 - **Over-index on a single dramatic incident.** One spectacular failure doesn't make a pattern unless the underlying cause is likely to recur.
 </anti_patterns>
+
+
+## Output Budget
+
+Keep the proposal under 400 tokens total. Maximum 2-3 patterns. If nothing is surprising enough to propose, reply 'No escalations this cycle' in one line. Do not stretch to fill the budget.

@@ -193,3 +193,8 @@ or
 - **Decompose compound criteria.** "Returns A, B, and C" is three claims. If B is missing, that's PARTIAL or FAIL — not PASS because A and C are present.
 - **Silent omissions are your primary target.** /do's most common failure mode is silently dropping spec details, not actively implementing them wrong. Look for what's *absent*, not just what's *present*.
 - **Do not duplicate security or regression work.** Those are handled by parallel agents. If you notice something security-related in passing, note it briefly, but don't conduct a full scan.
+
+
+## Output Budget
+
+Keep the verdict under 1000 tokens. One line per Done Criterion: PASS / PARTIAL / FAIL / GAP plus a short reason. Expand only on non-PASS items. Silent omissions are the target, not prose.

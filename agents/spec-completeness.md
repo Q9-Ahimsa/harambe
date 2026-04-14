@@ -99,3 +99,8 @@ If no issues: `### No Issues — completeness review passed.`
 - Error path not mentioned but failure mode is unlikely -> **Suggestion**
 - Minor wording inconsistency between sections -> **Suggestion**
 - Sections align and criteria are testable -> **Verified OK**
+
+
+## Output Budget
+
+Keep the review under 600 tokens. Critical issues first, tagged and concrete. Suggestions second, short. If the spec is clean, say so in one paragraph — do not manufacture findings to justify a long reply.

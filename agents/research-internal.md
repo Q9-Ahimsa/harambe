@@ -99,3 +99,8 @@ Write your findings to `.claude/specs/{feature}-research-internal.md`.
 - **Flag contradictions** — if different parts of the codebase handle similar things differently, note both approaches and where each is used
 - **Be specific** — include file paths, line ranges, function names. Vague findings waste /think's time
 - **Distinguish certainty levels** — "X is always done this way" vs "X appears to be the convention based on 3 examples"
+
+
+## Output Budget
+
+Keep the research brief under 1500 tokens. Structured Findings first — that is the section /think and quality-gate agents actually read. Implications and Flags should be short focused paragraphs, not expansions. If you need more length, put it in Findings, not elsewhere.

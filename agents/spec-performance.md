@@ -124,3 +124,8 @@ If no issues: `### No Issues — performance review passed.`
 - Missing caching opportunity -> **Suggestion**
 - Query on unindexed column (small table) -> **Suggestion**
 - Bounded operations with reasonable limits -> **Verified OK**
+
+
+## Output Budget
+
+Keep the review under 600 tokens. Concrete issues only: N+1 queries, unbounded loops, missing timeouts. One line each with file location. Drop theoretical performance discussion — flag the concrete problem.

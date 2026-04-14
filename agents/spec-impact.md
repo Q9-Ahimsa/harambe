@@ -133,3 +133,8 @@ If no issues: `### No Issues — impact review passed.`
 - Additive change with low consumer count, all accounted for -> **Verified OK**
 - Transitive effect identified but contained to 1 module -> **Suggestion**
 - Test fixtures might need updating (uncertain) -> **Suggestion**
+
+
+## Output Budget
+
+Keep the review under 600 tokens. Lead with the impact table — interface, consumers, updated, test-covered. Narrative prose after only for Critical findings. Verified-OK rows get one line in the table, no prose.

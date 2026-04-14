@@ -153,3 +153,8 @@ For each regression:
 - Consumer updated correctly by the build -> **OK**
 - Import of old path found but file was re-exported -> **OK** (backward compat maintained)
 - Pre-build test count matches post-build -> **OK** (no tests lost)
+
+
+## Output Budget
+
+Keep the report under 600 tokens. Breakage targets first as a short list. Untouched consumers as a one-line OK summary. Do not expand on items marked OK.

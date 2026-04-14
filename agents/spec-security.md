@@ -114,3 +114,8 @@ If no issues: `### No Issues — security review passed.`
 - Missing rate limiting -> **Suggestion**
 - Error messages slightly too detailed -> **Suggestion**
 - Auth mechanism present and correctly scoped -> **Verified OK**
+
+
+## Output Budget
+
+Keep the review under 600 tokens. Order findings by severity: CRITICAL, HIGH, MEDIUM, LOW. One line per finding with location and fix. Skip defense-of-best-practices prose; just list the issues.

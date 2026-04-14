@@ -92,3 +92,8 @@ Write your findings to `.claude/specs/{feature}-research-external.md`.
 - **Cite sources** — include URLs for documentation, blog posts, and references
 - **Flag recency** — note when information might be outdated or when a field is rapidly changing
 - **Distinguish authority levels** — official docs > maintainer blog posts > community conventions > individual opinions
+
+
+## Output Budget
+
+Keep the research brief under 1500 tokens. Lead with the landscape of approaches and their trade-offs in structured form. Cite sources inline. If a topic is rapidly evolving, flag it in one sentence rather than long caveats.

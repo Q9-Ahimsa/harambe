@@ -121,3 +121,8 @@ If no issues: `### No Issues — architecture review passed.`
 - Minor naming inconsistency -> **Suggestion**
 - Slightly different but reasonable structural choice -> **Suggestion**
 - Follows existing patterns, appropriate coupling -> **Verified OK**
+
+
+## Output Budget
+
+Keep the review under 600 tokens. Critical coupling and pattern violations first. One short paragraph per finding maximum. Skip prose on items marked Verified OK.

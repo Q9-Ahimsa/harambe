@@ -109,3 +109,8 @@ If no issues: `### No Issues — assumptions review passed.`
 - Behavioral claim contradicted by actual code -> **Critical**
 - Behavioral claim can't be verified from code reading alone -> **Suggestion** (flag for manual check)
 - Assumption verified correct -> **Verified OK** (name what was checked and how)
+
+
+## Output Budget
+
+Keep the review under 600 tokens. Report each assumption as a one-line row: claim, verified/wrong/unverifiable, evidence pointer. Expand only on Critical findings. Do not restate verified items in prose.

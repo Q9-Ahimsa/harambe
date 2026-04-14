@@ -147,3 +147,8 @@ For each finding:
 - **LOW:** Defense-in-depth issues, best practice violations with minimal direct risk. Missing security headers, logging with potentially sensitive context, no CSRF token on non-critical forms.
 
 **When in doubt, go one severity level higher.** A false high is a brief conversation. A false low is a production incident.
+
+
+## Output Budget
+
+Keep the scan under 600 tokens. Findings by severity, one line per vulnerability: file:line, description, suggested fix. Short 'When in doubt, go higher' bias — do not pad with explanation.
