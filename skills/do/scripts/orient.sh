@@ -4,61 +4,11 @@
 
 set -euo pipefail
 
-# --- Helpers ---
-
-# Extract full session log entries matching a metadata pattern
-# $1 = file path, $2 = awk regex to match on metadata lines
-extract_entries() {
-  local file="$1" pattern="$2"
-  [ -f "$file" ] || return 0
-  tr -d '\r' < "$file" | awk -v pat="$pattern" '
-    /^<!-- id:/ {
-      if (buf && keep) printf "%s\n", buf
-      buf = $0; keep = 0
-      if ($0 ~ pat) keep = 1
-      next
-    }
-    { buf = buf "\n" $0 }
-    END { if (buf && keep) printf "%s\n", buf }
-  '
-}
-
-# Extract a frontmatter field value from a spec file
-# $1 = file path, $2 = field name (e.g., "Status", "Desc")
-# Tries bold-asterisk format first (**Field:** value), then falls back to
-# YAML frontmatter (case-insensitive). This handles drift where /think writes
-# YAML-style frontmatter instead of the template's bold-asterisk format.
-spec_field() {
-  local file="$1" field="$2" line
-  [ -f "$file" ] || return 0
-
-  # Format 1: bold-asterisk — **Field:** value
-  line=$(grep -m1 "^\*\*${field}:\*\*" "$file" 2>/dev/null || true)
-  if [ -n "$line" ]; then
-    echo "$line" | sed "s/\*\*${field}:\*\* *//" | tr -d '\r\`'
-    return 0
-  fi
-
-  # Format 2: YAML frontmatter (between --- markers, case-insensitive field)
-  awk -v field="$field" '
-    BEGIN { lc_field = tolower(field); in_yaml = 0 }
-    /^---[[:space:]]*$/ {
-      if (in_yaml) exit
-      in_yaml = 1
-      next
-    }
-    in_yaml {
-      lc_line = tolower($0)
-      if (lc_line ~ "^[[:space:]]*"lc_field"[[:space:]]*:") {
-        sub(/^[[:space:]]*[^:]+:[[:space:]]*/, "")
-        gsub(/^["\047]|["\047]$/, "")
-        print
-        exit
-      }
-    }
-  ' "$file" | tr -d '\r\`'
-  return 0
-}
+# --- Shared helpers ---
+# Sourced from scripts/orient-lib.sh three dirs up (plugin root, or ~/.claude
+# when used as a local skill). Prefers CLAUDE_PLUGIN_ROOT when set.
+# shellcheck disable=SC1090
+source "${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}/scripts/orient-lib.sh"
 
 # --- Output ---
 
