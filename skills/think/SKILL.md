@@ -338,6 +338,55 @@ Short answers and "idk" do NOT end /think — adapt. Explicit readiness ("write 
 
 ---
 
+## Cardinality: mono vs multi
+
+**Re-apply this before writing the spec.** /feel's `Cardinality` call on the design doc is a proposal — you have research evidence now. If this framework contradicts the proposal, pivot silently (see In-Phase Pivot below). **No user confirmation gate** — deliberate via this framework and proceed.
+
+### Consider multi only when ONE hard trigger fires
+
+1. **Multi-PR shipping already planned.** The work was framed as "ships in two PRs" / "staged rollout" / "phased migration" / "behind a feature flag by slice."
+2. **Different release schedules.** One piece is blocked on an external dependency (upstream library, another team, a go-live date) while others are ready. Blocked and unblocked can't share a PR.
+3. **Deployment staging required.** One piece must physically ship before or after another (e.g., client update must land before server cleanup removes the old endpoint).
+4. **Multiple independent value statements.** The work was framed as "A and B and C" where each delivers its own user-visible value — not "A that touches many files."
+
+### Anti-signals — pull back to mono even when a trigger fires
+
+- Pieces share runtime state that can't be split cleanly.
+- Test surfaces are intertwined (slice A needs slice B to exist to test).
+- The whole reasoning only makes sense as one picture.
+- **Atomic shipability: would this naturally land as one PR?** Strongest anti-signal — overrides breadth, file count, criteria count.
+
+### Decision rule
+
+Go multi ONLY when all three hold:
+(a) at least one hard trigger fires,
+(b) no anti-signal applies,
+(c) you can name slices concretely — real nouns like `jwt-middleware`, `login-endpoint`, not categories like `auth-stuff-part-1`.
+
+If any clause fails, stay mono. Write one sentence in the spec's Key Decisions explaining the call: "Multi considered because [trigger], kept mono because [anti-signal]."
+
+### If multi fires, slice like this
+
+1. Name each slice with a concrete noun. Each name becomes the slice ID.
+2. For each slice, state: scope (what's in), files (touched), a one-line end state ("what working looks like for this slice").
+3. Verify independence: can you write slice A's done criteria without slice B existing? If not, the slicing is fake — downgrade to mono.
+4. Write one spec file per slice with the parent design's slice ID in its `**Slice:**` frontmatter field. Use a filename convention like `{parent-feature}-{slice-id}.md`.
+
+### In-phase pivot (no user gate)
+
+If during this phase you realize the prior cardinality call was wrong (either /feel's call on the design doc, or your own earlier call), pivot silently: update the affected frontmatter, note the reason in session.log with a `PIVOT:` prefix, and continue. Do NOT stop to ask — deliberate via this framework and proceed. Reasoning lands in the written artifact; user sees the result, not mid-flight questions.
+
+### Informational signals — NOT triggers
+
+These are typical in dense specs and must NOT trigger multi by themselves:
+- Criteria count > 15
+- Files touched > 10
+- Subsystems touched > 3
+
+If any are notable and the work is still mono, the Key Decisions should say so briefly: "22 criteria across 8 files — still mono; pieces share a migration and ship atomically."
+
+---
+
 ## Writing the Spec
 
 Use the template at [spec-template.md](./assets/spec-template.md). Fill every section. The spec is for the **executor** — optimize for precision, not explanation. It must be detailed enough that a **fresh Claude session running /do can execute without judgment calls**.

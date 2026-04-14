@@ -8,8 +8,10 @@ YAML frontmatter (---/---) even if the project's other files use YAML.
 
 **Type:** design
 **Created:** {date}
-**Status:** draft | ready | consumed
+**Status:** draft | ready | consumed | cancelled
 **Session:** {feature-name}.{n}
+**Cardinality:** mono | multi
+**Slices:** {empty for mono; comma-separated slice IDs for multi, e.g. jwt-middleware, login-endpoint, password-reset}
 **Desc:** {single-line summary — the outcome in user terms}
 
 ---

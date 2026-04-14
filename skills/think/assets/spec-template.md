@@ -2,9 +2,11 @@
 
 **Type:** spec
 **Created:** {date}
-**Status:** draft | ready | building | complete
+**Status:** draft | ready | building | complete | cancelled
 **Session:** {feature-name}.{n}
 **Design:** {.claude/specs/{feature}-design.md, or omit if no design doc was consumed}
+**Cardinality:** mono | multi
+**Slice:** {omit for mono; slice ID from parent design doc's Slices list for multi, e.g. jwt-middleware}
 **Desc:** {single-line summary of the outcome — what, not how}
 
 ---
