@@ -134,6 +134,41 @@ After each subagent completes, specifically check for:
 
 ---
 
+## Worker Tier Selection
+
+> **Every /do implementation spawn uses `subagent_type: "build-worker"`.** The worker is pinned to `model: sonnet` in its frontmatter — that is the **floor**. If you forget to think about tiers, you still get sonnet, not whatever model the parent session happens to be running.
+
+The floor is the default, not the ceiling. When a task's shape clearly warrants a different tier, pass `model: <tier>` in the Agent call to override it at spawn time. The rubric:
+
+| Task shape | Tier | When |
+|---|---|---|
+| **Mechanical** — isolated function, 1–2 files, spec has literal contracts pasted, no integration concerns | `haiku` | The work is pattern-matching against the paste. Most wave-mode tasks with tight ownership qualify |
+| **Standard** — multi-file coordination, integration between contracts, judgment about edge cases | `sonnet` (floor — no override) | Default. Most sequential per-criterion work |
+| **Architectural** — touches module boundaries, requires codebase-wide reasoning to implement safely | `opus` | Rare. If you reach for opus, suspect the spec is underspecified and /think should have caught it |
+
+**How to override at spawn:**
+
+```
+Agent(
+  subagent_type: "build-worker",
+  model: "haiku",          // or "opus" — omit to use the sonnet floor
+  prompt: {the prompt you prepared}
+)
+```
+
+**Signals to override DOWN to haiku:** spawn prompt pastes the complete implementation target (you could almost write it yourself); ownership is 1–2 files; no ambiguous interface decision; `/decompose` has already enforced atomicity and literal code.
+
+**Signals to override UP to opus:** criterion touches a module boundary marked high-risk in /think's `ALIGNED.DECIDED`; the spec's `APPROACH` has a `?` or `TBD` near this criterion; the test for this criterion requires a novel testing pattern the codebase doesn't have yet.
+
+**Signals that do NOT justify overriding** (stick with the sonnet floor):
+- "It feels hard" — that's ambient uncertainty, not architectural complexity. Sonnet is fine
+- "It touches three files" — integration tasks are sonnet's sweet spot, not opus's
+- "The test is tricky to write" — TDD friction is not model friction. A more capable model will not write easier tests
+
+> **When in doubt, trust the floor.** The worker can report `BLOCKED` with `BLOCKER_CLASS: REASONING`, and you can escalate via re-dispatch (see Handling Divergence → RE-DISPATCH). The escalation path is cheap. Guessing high is permanent waste.
+
+---
+
 ## Phase Transitions
 
 Mark every phase transition:
@@ -239,12 +274,18 @@ Read-only: {specific files}
 {exact command to run tests}
 ```
 
-**2. Execute (subagent)**
+**2. Execute (build-worker subagent)**
 
-Spawn the subagent. It runs the TDD cycle:
+Spawn the worker explicitly via `Agent(subagent_type: "build-worker", prompt: <the prompt you just prepared>)`. The agent is pinned to `model: sonnet` in its frontmatter — that is the floor. To override for this specific criterion, pass `model: "haiku"` or `model: "opus"` per the rubric in §"Worker Tier Selection" above.
+
+> **Do NOT spawn as a generic `general-purpose` agent.** That path inherits the parent session's model, which silently runs every worker on whatever the orchestrator happens to be using (typically Opus). Explicit `subagent_type: "build-worker"` is what makes the sonnet floor hold.
+
+The worker runs the TDD cycle:
 - **Red** — write a failing test. Run the suite. Confirm correct failure reason
 - **Green** — simplest implementation that passes
 - **Refactor** — clean up + while-we're-here fixes
+
+It returns a structured status: `DONE`, `DONE_WITH_CONCERNS`, `BLOCKED` (with classification), or `PROBLEM`. Each status has a specific handler — see Handling Divergence.
 
 **3. Post-flight (main context)**
 
@@ -292,7 +333,11 @@ For specs with `## Execution Plan`. Execute waves in order, tasks within each wa
 
 For each wave:
 
-**1. Spawn sub-agents** — one per task:
+**1. Spawn build-worker sub-agents** — one per task, all in a single message so they run in parallel. Each spawn uses `Agent(subagent_type: "build-worker", prompt: <task prompt>)`. The sonnet floor from the worker's frontmatter applies automatically; override per task via `model: "haiku"` or `model: "opus"` using the §"Worker Tier Selection" rubric.
+
+> **Wave-mode bias: override DOWN more aggressively.** Wave tasks are, by construction, atomic and file-scoped — that's why `/parallelize` put them in a wave. Most wave workers qualify for `model: "haiku"`. If you're spawning 4 parallel wave workers, overriding all 4 to haiku is typically safe and can cut wave cost by ~4×. Check the rubric signals before overriding, but default-to-haiku is the wave-mode norm, not the exception.
+
+Task prompt template:
 
 ```
 You are building task {T[N]} for feature {feature-name}.
@@ -341,17 +386,21 @@ Divergence detection is **structural, not optional.** It happens during post-fli
 ### Where Divergences Surface
 
 1. **Post-flight validation** — you read the subagent's output and compare against the spec. Mismatch? That's a divergence.
-2. **Subagent PROBLEM notes** — the subagent couldn't proceed and reported why. That's a divergence.
-3. **Test failures** — tests fail in ways the spec didn't predict. That's a divergence.
+2. **Subagent BLOCKED notes** — the worker couldn't proceed and classified the blocker (`CONTEXT`, `REASONING`, `TOO_LARGE`, or `OWNERSHIP`). BLOCKED is often recoverable via re-dispatch — see RE-DISPATCH below.
+3. **Subagent PROBLEM notes** — the worker found that the spec's approach contradicts reality. Different from BLOCKED: PROBLEM is about the spec being wrong, BLOCKED is about the worker's capacity. PROBLEM is rarely recoverable without /think.
+4. **Test failures** — tests fail in ways the spec didn't predict. That's a divergence.
 
 ### How to Handle
 
 ```
-Mismatch found during post-flight
+Divergence detected
 │
 ├─ Can I fix this in main context without a judgment call?
 │  (import path differs, file renamed, trivial mismatch)
 │  └─ FIX — fix it, log as AMENDED in session log, surface in build report
+│
+├─ Worker returned BLOCKED with a classification?
+│  └─ RE-DISPATCH — classify and retry with changed inputs (see below)
 │
 ├─ Needs a decision from the user?
 │  └─ ASK — pause, AskUserQuestion, log as DECISION:, continue
@@ -360,7 +409,7 @@ Mismatch found during post-flight
    └─ STOP — the approach is broken. See below.
 ```
 
-Two paths, not four. The decision is binary: **can I handle this, or do I need you?**
+Four paths. The tree is ordered by escalation cost: FIX is free, RE-DISPATCH spends one spawn, ASK interrupts the user, STOP halts the build. Always walk the tree in order — don't escalate past a branch that handles the case.
 
 ### FIX — handle it, log it
 
@@ -373,6 +422,50 @@ Mismatch is clear and the correct resolution is obvious. Fix in main context. Lo
 ```
 
 All fixes are surfaced collectively in the build report.
+
+### RE-DISPATCH — worker returned BLOCKED
+
+The worker couldn't complete but told you why. Read the worker's `BLOCKER_CLASS` and `WHAT_WOULD_UNBLOCK` fields, then handle by class:
+
+**CONTEXT** — the worker was missing information you could have included in the prompt. A file wasn't pasted, an interface definition was absent, a constraint was unclear. Gather the missing input, augment the spawn prompt, re-dispatch the **same tier**. Log as:
+
+```markdown
+- RE-DISPATCH: CONTEXT — {what was missing}
+  CRITERION: {criterion text}
+  ADDED: {what you pasted into the retry prompt}
+  ATTEMPT: {1 or 2}
+```
+
+Max 2 retries per criterion. If the worker still reports CONTEXT-BLOCKED after two re-dispatches with genuinely different context, that's not a context problem — promote to ASK (the orchestrator is missing judgment the user needs to supply).
+
+**REASONING** — the worker was out of its depth. The prompt was complete; the worker couldn't synthesize a solution. Re-dispatch **one tier up** (sonnet → opus) with the prior attempt's `WHAT_I_TRIED` and `WHERE_I_GOT_STUCK` appended to the prompt as "prior attempt context." Log as:
+
+```markdown
+- RE-DISPATCH: REASONING — escalating sonnet → opus
+  CRITERION: {criterion text}
+  PRIOR_STUCK: {where the previous worker got stuck}
+```
+
+If the higher tier **also** reports REASONING-BLOCKED, stop — this is no longer a model problem, it's a spec problem. Promote to STOP.
+
+**TOO_LARGE** — the task is bigger than the spec made it look. The fix is scope, not tier.
+
+- **In Sequential Mode:** write an `AMENDED` entry to the spec splitting the criterion into N sub-criteria. Each sub-criterion must be individually atomic. Build each as a separate per-criterion loop. Log as:
+  ```markdown
+  - AMENDED: split criterion into {N} sub-criteria (TOO_LARGE)
+    ORIGINAL: {original criterion text}
+    SPLIT: {the N new criterion texts}
+  ```
+- **In Wave Mode:** do NOT re-scope mid-wave. Wave plans depend on file ownership contracts that assume the original task boundaries. Splitting a wave task breaks those contracts. Promote to STOP, report the TOO_LARGE task as a blocker, and let /think re-wave.
+
+**OWNERSHIP** — the correct implementation requires modifying files outside the worker's ownership list. Two sub-paths:
+
+- If the conflict is minor and the extra files are clearly needed by the task (e.g., a shared type file that every task in this area needs to touch): expand the ownership list in the spawn prompt and re-dispatch the **same tier**. Log as an AMENDED ownership expansion.
+- If the conflict reflects a deeper mismatch — the spec put work in the wrong task boundary, or two wave tasks genuinely need to modify the same file — promote to STOP. This is a /parallelize failure, not a build failure.
+
+> **Never force the same model to retry without changes.** Re-dispatching with identical context and identical tier is the definition of waste. Something must change: more context (CONTEXT class), a higher tier (REASONING class), or smaller scope (TOO_LARGE class). If you cannot identify what's different about the retry, you are not re-dispatching — you are retrying and hoping, which is a bug.
+
+> **Watch retry budgets.** Each criterion has a hard ceiling of 2 re-dispatches before you escalate to ASK or STOP. Three worker spawns on the same criterion is the signal that the problem is not at the worker level.
 
 ### ASK — needs user judgment
 
