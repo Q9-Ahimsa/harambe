@@ -391,6 +391,36 @@ If any are notable and the work is still mono, the Key Decisions should say so b
 
 Use the template at [spec-template.md](./assets/spec-template.md). Fill every section. The spec is for the **executor** — optimize for precision, not explanation. It must be detailed enough that a **fresh Claude session running /do can execute without judgment calls**.
 
+### Multi design doc consumption
+
+If the design doc you're consuming has `**Cardinality:** multi`, do NOT
+produce one spec covering the whole design. Instead:
+
+1. Read the design doc's `**Slices:**` frontmatter -- comma-separated slice IDs.
+2. Use `specs_for_design` (in `scripts/orient-lib.sh`) to find which
+   slices already have specs in `.claude/specs/` or
+   `.claude/specs/archive/`. Read each existing spec's `**Slice:**`
+   field to know which slice it handles.
+3. Pick the FIRST slice from the design's list that has no existing spec.
+4. Write a spec for THAT slice only. The spec's filename should be
+   `{parent-feature}-{slice-id}.md`. Its frontmatter must include:
+   - `**Cardinality:** multi`
+   - `**Design:** {path to parent design doc}`
+   - `**Slice:** {slice-id}`
+5. The spec's What and Approach describe ONLY this slice's work, not
+   the whole multi feature. The slice's one-line end state is in the
+   parent design doc's reasoning.
+6. Done Criteria are scoped to this slice only.
+
+Each /think run produces exactly one spec, even when the design doc is
+multi. Multiple /think runs over time produce all the slice-specs.
+/do runs against each spec independently. Cascade cleanup auto-archives
+the design doc when the last slice's spec is archived (Follow-Up 3).
+
+If all slices in the design's list already have specs, surface this to
+the user -- there's no new spec to write. Suggest moving on to /do or
+adding more slices.
+
 ### Ground Assumptions
 
 Before finalizing:
