@@ -877,6 +877,46 @@ Before declaring done (this is the Checkpoint Hygiene rule):
 
 Only consider the feature fully complete when ALL post-session activities are done. Update status at that point.
 
+### Cascade cleanup for multi specs
+
+After archiving the spec, check whether this spec was part of a multi
+design doc umbrella. If so, probe whether the parent design doc is now
+fully terminal (all slices `complete` or `cancelled`) and cascade-archive
+it if it is.
+
+Run this bash block (idempotent -- safe to re-run):
+
+```bash
+source "${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}/scripts/orient-lib.sh"
+
+# $ARCHIVED_SPEC is set to the just-archived spec's basename, e.g. "auth-mw.md"
+spec_path=".claude/specs/archive/$ARCHIVED_SPEC"
+design_link=$(spec_field "$spec_path" "Design")
+spec_card=$(spec_field "$spec_path" "Cardinality")
+
+if [ "$spec_card" = "multi" ] && [ -n "$design_link" ]; then
+  design_path=".claude/specs/$(basename "$design_link")"
+  if [ -f "$design_path" ]; then
+    read complete cancelled total <<< $(count_terminal_slices "$design_path")
+    terminal=$((complete + cancelled))
+    if [ "$terminal" -eq "$total" ] && [ "$total" -gt 0 ]; then
+      mv "$design_path" ".claude/specs/archive/$(basename "$design_path")"
+      echo "CASCADE: $(basename "$design_path") fully terminal ($complete complete, $cancelled cancelled, $total total) -- archived."
+      cat >> .claude/session.log <<LOG
+
+<!-- id:cascade.$(date +%s) | feature:cleanup | phase:cleanup | date:$(date +%Y-%m-%d) | status:complete -->
+CASCADE: $(basename "$design_path") fully terminal -- archived after $ARCHIVED_SPEC closed out.
+LOG
+    fi
+  fi
+fi
+```
+
+This probe is idempotent. If a previous /do run already cascade-archived
+the design, this run finds the design already at the archive path and
+the probe is a no-op. If parallel /do runs cascade simultaneously, one
+will win and the other will see the design already moved (also a no-op).
+
 ---
 
 ## Session Log
