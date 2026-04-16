@@ -62,3 +62,56 @@ cardinality_marker() {
     echo "$value"
   fi
 }
+
+# List all specs that back-link to a given design doc.
+# Searches both .claude/specs/ and .claude/specs/archive/.
+# $1 = design doc filename or absolute path
+# Output: one spec file path per line
+specs_for_design() {
+  local design="$1"
+  local design_basename
+  design_basename=$(basename "$design")
+
+  for dir in .claude/specs .claude/specs/archive; do
+    [ -d "$dir" ] || continue
+    for spec in "$dir"/*.md; do
+      [ -f "$spec" ] || continue
+      # Skip design docs and research briefs
+      case "$(basename "$spec")" in
+        *-design.md|*-research-*.md) continue ;;
+      esac
+      local link
+      link=$(spec_field "$spec" "Design")
+      [ -z "$link" ] && continue
+      if [[ "$(basename "$link")" == "$design_basename" ]]; then
+        echo "$spec"
+      fi
+    done
+  done
+}
+
+# Count terminal slices for a given multi design doc.
+# $1 = design doc path
+# Output: "complete_count cancelled_count total_listed"
+count_terminal_slices() {
+  local design="$1"
+  local listed
+  listed=$(spec_field "$design" "Slices")
+  [ -z "$listed" ] && { echo "0 0 0"; return 0; }
+
+  local total
+  total=$(echo "$listed" | tr ',' '\n' | grep -c .)
+
+  local complete=0 cancelled=0
+  while IFS= read -r spec; do
+    [ -z "$spec" ] && continue
+    local status
+    status=$(spec_field "$spec" "Status")
+    case "$status" in
+      complete) complete=$((complete + 1)) ;;
+      cancelled) cancelled=$((cancelled + 1)) ;;
+    esac
+  done < <(specs_for_design "$design")
+
+  echo "$complete $cancelled $total"
+}
