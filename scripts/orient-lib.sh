@@ -50,3 +50,15 @@ spec_field() {
   ' "$file" | tr -d '\r\`'
   return 0
 }
+
+# Returns the Cardinality field value, or "mono" if absent (backwards compatible).
+# $1 = file path
+cardinality_marker() {
+  local file="$1" value
+  value=$(spec_field "$file" "Cardinality")
+  if [ -z "$value" ]; then
+    echo "mono"
+  else
+    echo "$value"
+  fi
+}

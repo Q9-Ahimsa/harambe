@@ -32,7 +32,11 @@ if [ -d ".claude/specs" ]; then
       desc=$(spec_field "$spec_file" "Desc")
       [ -z "$desc" ] && desc="(no desc)"
       criteria_count=$(grep -c '^\- \[ \]' "$spec_file" 2>/dev/null || true)
-      echo "- ${fname} — ${desc} (${criteria_count} Done Criteria)"
+      card=$(cardinality_marker "$spec_file")
+      slice=$(spec_field "$spec_file" "Slice")
+      slice_marker=""
+      [ -n "$slice" ] && slice_marker=", slice=${slice}"
+      echo "- ${fname} [${card}${slice_marker}] — ${desc} (${criteria_count} Done Criteria)"
       ready_found=true
     fi
   done

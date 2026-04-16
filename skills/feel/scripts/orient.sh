@@ -35,7 +35,8 @@ if [ -d ".claude/specs" ]; then
     status=$(spec_field "$design_file" "Status")
     desc=$(spec_field "$design_file" "Desc")
     [ -z "$desc" ] && desc="(no desc)"
-    echo "- ${fname} [${status}] — ${desc}"
+    card=$(cardinality_marker "$design_file")
+    echo "- ${fname} [${status}, ${card}] — ${desc}"
     designs_found=true
   done
 fi
