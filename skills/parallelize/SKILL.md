@@ -1,6 +1,6 @@
 ---
 name: parallelize
-description: Analyze a plan for parallel execution. Adds wave scheduling, file ownership, contracts, and agent prompts. Use after decompose.
+description: "Analyze a plan for parallel execution. Adds wave scheduling, file ownership, contracts, and agent prompts. Use after planning. Triggers on: parallelize, parallel agents, optimize for agents, agent coordination, batch the work."
 ---
 
 # /parallelize

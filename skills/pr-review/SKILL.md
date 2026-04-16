@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Blind parallel code review. Dispatches 4 independent review agents with only the raw diff and spec criteria, no narrative framing. Posts findings to GitHub.
+description: "Blind parallel code review for pull requests. Dispatches 4 independent review agents (correctness, security, performance, style) with only the raw diff and spec criteria — no narrative framing. Posts findings to GitHub for provenance. Triggers on: pr review, review this pr, review PR, blind review."
 ---
 
 # /pr-review

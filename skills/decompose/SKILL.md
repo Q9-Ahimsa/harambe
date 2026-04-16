@@ -1,6 +1,6 @@
 ---
 name: decompose
-description: Break an implementation plan into atomic, agent-sized tasks with file ownership and dependency mapping. Use after planning and before parallelization.
+description: "Break an implementation plan into atomic, agent-sized tasks with file ownership and dependency mapping. This skill should be used after planning and before parallelization. Produces a numbered task inventory ready for /parallelize or sequential execution. Triggers on: decompose, break this down, task breakdown, split into tasks, atomize."
 ---
 
 # /decompose
