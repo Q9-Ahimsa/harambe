@@ -421,6 +421,23 @@ If all slices in the design's list already have specs, surface this to
 the user -- there's no new spec to write. Suggest moving on to /do or
 adding more slices.
 
+### Cancelling a planned slice
+
+If during /think you realize a slice in the parent design doc is no
+longer needed (product change, infeasibility, descoped), do NOT delete
+the slice from the design doc's Slices list -- that orphans the design's
+history. Instead:
+
+1. Write a minimal spec for the slice with `**Status:** cancelled` and
+   a one-paragraph What explaining why it was cancelled.
+2. Move the spec immediately to `.claude/specs/archive/` (no /do run).
+3. Cascade probe will count the cancelled slice as terminal alongside
+   completed slices, allowing the design doc to auto-archive when
+   appropriate.
+
+This preserves the audit trail: the Slices list still shows the
+original decomposition, and the cancelled spec records the reasoning.
+
 ### Ground Assumptions
 
 Before finalizing:

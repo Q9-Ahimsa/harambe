@@ -877,6 +877,20 @@ Before declaring done (this is the Checkpoint Hygiene rule):
 
 Only consider the feature fully complete when ALL post-session activities are done. Update status at that point.
 
+### Cancelling a slice mid-build
+
+If during /do you discover the slice can't be built as scoped (blocked
+by external dependency, infeasibility revealed during implementation):
+
+1. Stop building.
+2. Set the spec's `**Status:** cancelled` and add a one-paragraph note
+   in Key Decisions explaining why.
+3. Move the spec to `.claude/specs/archive/` directly -- no PR, no merge.
+4. Run the cascade cleanup probe. The cancelled spec counts as terminal.
+
+Cancellation is human-initiated, never automatic. Always surface the
+reason to the user before cancelling.
+
 ### Cascade cleanup for multi specs
 
 After archiving the spec, check whether this spec was part of a multi
